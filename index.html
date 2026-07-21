@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WeLucky Accounting</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ====== POKEMON FUTURISTIC THEME ====== */
+  :root {
+    --bg-0: #05070f;
+    --bg-1: #0b0f1f;
+    --bg-2: #111634;
+    --bg-card: rgba(17, 23, 56, 0.65);
+    --border: rgba(255, 203, 5, 0.25);
+    --border-hot: rgba(255, 203, 5, 0.6);
+    --text: #e5edff;
+    --text-dim: #8ea0c9;
+    --pk-red: #ef4444;
+    --pk-yellow: #fcd34d;
+    --pk-gold: #fbbf24;
+    --pk-cyan: #22d3ee;
+    --pk-green: #34d399;
+    --pk-purple: #a855f7;
+    --glow-y: 0 0 18px rgba(252, 211, 77, 0.55);
+    --glow-c: 0 0 18px rgba(34, 211, 238, 0.55);
+    --glow-r: 0 0 18px rgba(239, 68, 68, 0.55);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+    background: var(--bg-0);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* animated grid + glow background */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(252,211,77,0.10), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(34,211,238,0.10), transparent 45%),
+      radial-gradient(circle at 50% 50%, rgba(168,85,247,0.07), transparent 60%),
+      linear-gradient(180deg, #05070f 0%, #0b0f1f 100%);
+    z-index: -2;
+  }
+  body::after {
+    content: "";
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(252,211,77,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(252,211,77,0.04) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: -1;
+    animation: gridMove 20s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes gridMove {
+    from { background-position: 0 0, 0 0; }
+    to { background-position: 50px 50px, 50px 50px; }
+  }
+
+  /* ====== HEADER ====== */
+  header {
+    background: linear-gradient(135deg, rgba(11,15,31,0.95), rgba(17,23,56,0.95));
+    backdrop-filter: blur(10px);
+    color: var(--text);
+    padding: 18px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 4px 30px rgba(252, 211, 77, 0.08), inset 0 -1px 0 rgba(252,211,77,0.15);
+    position: relative;
+  }
+  header::before {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--pk-yellow), var(--pk-red), var(--pk-cyan), transparent);
+    opacity: 0.7;
+  }
+  header h1 {
+    margin: 0; font-size: 22px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    letter-spacing: 3px;
+    background: linear-gradient(90deg, var(--pk-yellow), #fff, var(--pk-cyan));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 20px rgba(252,211,77,0.3);
+  }
+  header h1::before { content: "◆ "; color: var(--pk-red); -webkit-text-fill-color: var(--pk-red); }
+  header h1::after { content: " ◆"; color: var(--pk-red); -webkit-text-fill-color: var(--pk-red); }
+  header .sub {
+    font-size: 11px; opacity: 0.7;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--pk-cyan);
+  }
+
+  /* ====== NAV ====== */
+  nav {
+    background: rgba(5, 7, 15, 0.7);
+    backdrop-filter: blur(10px);
+    padding: 0 28px;
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 10;
+  }
+  nav button {
+    background: none; border: none;
+    padding: 14px 22px;
+    cursor: pointer; font-size: 13px;
+    font-family: 'Orbitron', sans-serif;
+    color: var(--text-dim);
+    border-bottom: 2px solid transparent;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    position: relative;
+  }
+  nav button.active {
+    color: var(--pk-yellow);
+    border-bottom-color: var(--pk-yellow);
+    text-shadow: 0 0 12px rgba(252,211,77,0.7);
+  }
+  nav button.active::before {
+    content: ""; position: absolute; left: 50%; bottom: -1px;
+    width: 50%; height: 2px;
+    background: var(--pk-yellow);
+    box-shadow: 0 0 12px var(--pk-yellow);
+    transform: translateX(-50%);
+  }
+  nav button:hover:not(.active) {
+    color: var(--pk-cyan);
+    background: rgba(34, 211, 238, 0.05);
+  }
+
+  main { padding: 28px; max-width: 1280px; margin: 0 auto; position: relative; }
+  .view { display: none; }
+  .view.active { display: block; animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ====== CARDS ====== */
+  .card {
+    background: var(--bg-card);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+    margin-bottom: 22px;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--pk-yellow), transparent);
+    opacity: 0.6;
+  }
+  .card h2 {
+    margin: 0 0 18px; font-size: 14px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--pk-yellow);
+    text-shadow: 0 0 10px rgba(252,211,77,0.4);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card h2::before {
+    content: "▶";
+    color: var(--pk-red);
+    font-size: 10px;
+    text-shadow: 0 0 8px var(--pk-red);
+  }
+
+  /* ====== KPI TILES ====== */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 16px; margin-bottom: 26px; }
+  .kpi {
+    background: linear-gradient(135deg, rgba(17,23,56,0.8), rgba(11,15,31,0.8));
+    padding: 20px 22px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .kpi:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(252, 211, 77, 0.25);
+    border-color: var(--border-hot);
+  }
+  .kpi::after {
+    content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+    background: var(--pk-cyan);
+    box-shadow: 0 0 12px var(--pk-cyan);
+  }
+  .kpi .label {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+  }
+  .kpi .value {
+    font-size: 30px;
+    font-weight: 700;
+    color: #fff;
+    margin-top: 8px;
+    font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+    letter-spacing: 0;
+    text-shadow: 0 0 14px rgba(255,255,255,0.2);
+  }
+  .kpi.revenue::after { background: var(--pk-green); box-shadow: 0 0 12px var(--pk-green); }
+  .kpi.revenue .value { color: var(--pk-green); text-shadow: 0 0 14px rgba(52,211,153,0.5); }
+  .kpi.expense::after { background: var(--pk-red); box-shadow: 0 0 12px var(--pk-red); }
+  .kpi.expense .value { color: var(--pk-red); text-shadow: 0 0 14px rgba(239,68,68,0.5); }
+  .kpi.profit::after { background: var(--pk-yellow); box-shadow: 0 0 12px var(--pk-yellow); }
+  .kpi.profit.positive .value { color: var(--pk-yellow); text-shadow: 0 0 14px rgba(252,211,77,0.6); }
+  .kpi.profit.negative .value { color: var(--pk-red); text-shadow: 0 0 14px rgba(239,68,68,0.6); }
+
+  /* ====== FORMS ====== */
+  form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 14px; align-items: end; }
+  .field { display: flex; flex-direction: column; }
+  .field label {
+    font-size: 10px;
+    color: var(--pk-cyan);
+    margin-bottom: 6px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Orbitron', sans-serif;
+  }
+  input, select, textarea {
+    padding: 10px 13px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 500;
+    background: rgba(5, 7, 15, 0.6);
+    color: var(--text);
+    transition: all 0.2s;
+  }
+  input::placeholder, textarea::placeholder { color: rgba(142, 160, 201, 0.5); }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--pk-yellow);
+    box-shadow: 0 0 0 3px rgba(252, 211, 77, 0.15), 0 0 20px rgba(252,211,77,0.2);
+    background: rgba(11, 15, 31, 0.9);
+  }
+  select option { background: var(--bg-1); color: var(--text); }
+
+  button.primary {
+    background: linear-gradient(135deg, var(--pk-red), #b91c1c);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 11px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 14px rgba(239,68,68,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: all 0.2s;
+  }
+  button.primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(239,68,68,0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+  button.danger {
+    background: rgba(239,68,68,0.15);
+    color: #fca5a5;
+    border: 1px solid rgba(239,68,68,0.4);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Orbitron', sans-serif;
+  }
+  button.danger:hover { background: rgba(239,68,68,0.3); color: #fff; }
+  button.ghost {
+    background: rgba(34, 211, 238, 0.08);
+    border: 1px solid rgba(34, 211, 238, 0.35);
+    color: var(--pk-cyan);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  button.ghost:hover {
+    background: rgba(34, 211, 238, 0.2);
+    color: #fff;
+    box-shadow: 0 0 14px rgba(34,211,238,0.4);
+  }
+
+  /* ====== TABLES ====== */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th {
+    text-align: left;
+    font-weight: 700;
+    color: var(--pk-yellow);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Orbitron', sans-serif;
+    background: rgba(5,7,15,0.4);
+  }
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(252,211,77,0.08);
+    color: var(--text);
+  }
+  tr:hover td { background: rgba(252,211,77,0.04); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: 'Rajdhani', 'Segoe UI', sans-serif; font-weight: 600; font-size: 15px; }
+  .empty { text-align: center; color: var(--text-dim); padding: 36px 0; font-style: italic; letter-spacing: 1px; }
+
+  .filter-row { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-row input, .filter-row select { padding: 7px 11px; font-size: 13px; }
+  .filter-row label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; font-family: 'Orbitron', sans-serif; }
+
+  .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: rgba(34, 211, 238, 0.15);
+    color: var(--pk-cyan);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border: 1px solid rgba(34,211,238,0.3);
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  /* ====== TOOLS ====== */
+  .tools { display: flex; gap: 8px; margin-left: auto; }
+  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .toolbar h2 { margin: 0; }
+
+  /* ====== BARS ====== */
+  .bar-row { display: grid; grid-template-columns: 200px 1fr 110px; gap: 14px; align-items: center; margin-bottom: 10px; font-size: 13px; }
+  .bar-track {
+    background: rgba(5,7,15,0.7);
+    border: 1px solid var(--border);
+    border-radius: 4px; height: 20px; overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    background: linear-gradient(90deg, var(--pk-red), var(--pk-gold), var(--pk-yellow));
+    height: 100%;
+    box-shadow: 0 0 12px rgba(252,211,77,0.5);
+    position: relative;
+  }
+  .bar-fill::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2s infinite;
+  }
+  @keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+  .bar-row .amt {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--pk-yellow);
+    font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  /* line items in invoice form */
+  .line-item input, .line-item select {
+    background: rgba(5,7,15,0.7);
+    color: var(--text);
+    border-color: var(--border);
+  }
+  .li-subtotal { color: var(--pk-yellow) !important; font-family: 'Rajdhani', sans-serif; font-weight: 700; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg-0); }
+  ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--pk-yellow), var(--pk-red)); border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--pk-yellow); }
+
+  /* selection */
+  ::selection { background: var(--pk-yellow); color: var(--bg-0); }
+</style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay" style="position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(circle at 30% 20%, rgba(252,211,77,0.15), transparent 50%),radial-gradient(circle at 70% 80%, rgba(34,211,238,0.15), transparent 50%),linear-gradient(180deg,#05070f,#0b0f1f);">
+  <!-- floating particles -->
+  <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(252,211,77,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(252,211,77,0.06) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;"></div>
+
+  <div style="background:linear-gradient(135deg,rgba(17,23,56,0.85),rgba(11,15,31,0.85));backdrop-filter:blur(20px);border:1px solid rgba(252,211,77,0.4);border-radius:20px;padding:42px 40px 32px;box-shadow:0 20px 80px rgba(0,0,0,0.6),0 0 60px rgba(252,211,77,0.15),inset 0 1px 0 rgba(255,255,255,0.08);width:90%;max-width:400px;text-align:center;position:relative;overflow:hidden;">
+
+    <!-- top neon strip -->
+    <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#fcd34d,#ef4444,#22d3ee,transparent);"></div>
+
+    <!-- logo with glowing ring -->
+    <div style="position:relative;width:180px;height:180px;margin:0 auto 20px;">
+      <div style="position:absolute;inset:-6px;border-radius:50%;background:conic-gradient(from 0deg,#ef4444,#fcd34d,#22d3ee,#a855f7,#ef4444);animation:spin 6s linear infinite;filter:blur(2px);opacity:0.8;"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;background:#05070f;"></div>
+      <img src="logo.png" alt="WeLucky TCG"
+           style="position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);border-radius:50%;object-fit:cover;box-shadow:0 0 30px rgba(252,211,77,0.4);"
+           onerror="this.style.display='none';document.getElementById('logoFallback').style.display='flex';" />
+      <div id="logoFallback" style="display:none;position:absolute;inset:6px;border-radius:50%;background:linear-gradient(135deg,#1e3a8a,#0b0f1f);align-items:center;justify-content:center;color:#fcd34d;font-size:64px;">🍀</div>
+    </div>
+
+    <h1 style="margin:0 0 6px;font-family:'Orbitron',sans-serif;font-size:24px;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,#fcd34d,#fff,#22d3ee);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">WE LUCKY TCG</h1>
+    <p style="margin:0 0 28px;font-family:'Orbitron',sans-serif;font-size:10px;color:#22d3ee;letter-spacing:5px;text-transform:uppercase;">◆ Trainer Access ◆</p>
+
+    <form onsubmit="doLogin(event)">
+      <input type="password" id="loginPassword" placeholder="● ● ● ● ● ● ● ●" required autofocus
+             style="width:100%;padding:14px 16px;font-size:15px;margin-bottom:14px;text-align:center;letter-spacing:4px;font-family:'Orbitron',monospace;background:rgba(5,7,15,0.7);color:#fcd34d;border:1px solid rgba(252,211,77,0.3);border-radius:8px;" />
+      <button type="submit" class="primary" style="width:100%;padding:13px;font-size:14px;letter-spacing:4px;">▶ Sign In</button>
+      <div id="loginError" style="display:none;color:#ef4444;font-size:12px;margin-top:14px;font-family:'Orbitron',sans-serif;letter-spacing:2px;text-transform:uppercase;">⚠ Access Denied</div>
+    </form>
+
+    <p style="margin:26px 0 0;font-size:10px;color:#8ea0c9;letter-spacing:3px;font-family:'Orbitron',sans-serif;">© WELUCKY TCG PTE LTD</p>
+  </div>
+</div>
+<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+
+<header>
+  <div>
+    <h1>We Lucky TCG</h1>
+    <div class="sub">🍀 We bring the luck, you pull the hits! 🍀</div>
+  </div>
+  <div class="tools">
+    <button class="ghost" onclick="exportJSON()">Export</button>
+    <button class="ghost" onclick="document.getElementById('importFile').click()">Import</button>
+    <button class="ghost" onclick="doLogout()">Logout</button>
+    <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJSON(event)" />
+  </div>
+</header>
+
+<nav>
+  <button class="active" data-view="dashboard">Dashboard</button>
+  <button data-view="invoices">Invoices</button>
+  <button data-view="expenses">Expenses</button>
+  <button data-view="products">Products</button>
+  <button data-view="reports">Reports</button>
+</nav>
+
+<main>
+
+  <!-- DASHBOARD -->
+  <section class="view active" id="view-dashboard">
+    <div class="filter-row">
+      <label style="font-size:13px;color:#6b7280;">Period:</label>
+      <select id="dashPeriod" onchange="renderDashboard()">
+        <option value="all">All time</option>
+        <option value="ytd" selected>Year to date</option>
+        <option value="month">This month</option>
+        <option value="lastmonth">Last month</option>
+      </select>
+    </div>
+    <div class="kpis">
+      <div class="kpi revenue"><div class="label">Revenue</div><div class="value" id="kpiRevenue">SGD 0</div></div>
+      <div class="kpi expense"><div class="label">Expenses</div><div class="value" id="kpiExpense">SGD 0</div></div>
+      <div class="kpi profit" id="kpiProfitCard"><div class="label">Net Profit</div><div class="value" id="kpiProfit">SGD 0</div></div>
+      <div class="kpi"><div class="label">Profit Margin</div><div class="value" id="kpiMargin">0%</div></div>
+      <div class="kpi"><div class="label">Invoices</div><div class="value" id="kpiInvCount">0</div></div>
+      <div class="kpi"><div class="label">Avg Invoice</div><div class="value" id="kpiAvgInv">SGD 0</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Expense Breakdown by Category</h2>
+      <div id="catBreakdown"></div>
+    </div>
+
+    <div class="card">
+      <h2>Monthly Trend</h2>
+      <div style="overflow-x:auto"><table id="monthlyTable">
+        <thead><tr><th>Month</th><th class="num">Revenue</th><th class="num">Expenses</th><th class="num">Profit</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- INVOICES -->
+  <section class="view" id="view-invoices">
+    <div class="card">
+      <h2>Add Invoice</h2>
+      <form id="invForm" onsubmit="addInvoice(event)">
+        <div class="field"><label>Date</label><input type="date" id="invDate" required /></div>
+        <div class="field"><label>Invoice No.</label><input type="text" id="invNo" placeholder="e.g. 20260023" required /></div>
+        <div class="field"><label>Customer</label><input type="text" id="invCustomer" placeholder="Customer name" /></div>
+        <div class="field"><label>Status</label>
+          <select id="invStatus">
+            <option value="Paid">Paid</option>
+            <option value="Unpaid">Unpaid</option>
+          </select>
+        </div>
+
+        <div style="grid-column:1/-1;border-top:1px dashed #d1d5db;padding-top:14px;margin-top:4px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <strong style="font-size:13px;color:#374151;">Line Items (pick from products — stock auto-deducts)</strong>
+            <button type="button" class="ghost" onclick="addLineItem()">+ Add Line</button>
+          </div>
+          <div id="invLineItems"></div>
+        </div>
+
+        <div class="field"><label>Amount (SGD)</label><input type="number" id="invAmount" step="0.01" min="0" required /></div>
+        <div class="field"><label>Notes</label><input type="text" id="invNotes" placeholder="Auto-filled from line items, or type your own" /></div>
+        <div><button class="primary" type="submit">Add Invoice</button></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <h2 style="margin:0;">Invoices</h2>
+        <div class="filter-row" style="margin:0;">
+          <input type="search" id="invSearch" placeholder="Search..." oninput="renderInvoices()" />
+          <select id="invStatusFilter" onchange="renderInvoices()">
+            <option value="">All statuses</option>
+            <option value="Paid">Paid</option>
+            <option value="Unpaid">Unpaid</option>
+          </select>
+        </div>
+      </div>
+      <div style="overflow-x:auto"><table id="invTable">
+        <thead><tr><th>Date</th><th>Invoice No.</th><th>Customer</th><th class="num">Amount</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+        <tbody></tbody>
+        <tfoot><tr><td colspan="3" style="text-align:right;font-weight:600;">Total</td><td class="num" id="invTotal" style="font-weight:600;">SGD 0</td><td colspan="3"></td></tr></tfoot>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- EXPENSES -->
+  <section class="view" id="view-expenses">
+    <div class="card">
+      <h2>Add Expense</h2>
+      <form id="expForm" onsubmit="addExpense(event)">
+        <div class="field"><label>Date</label><input type="date" id="expDate" required /></div>
+        <div class="field"><label>Description</label><input type="text" id="expDesc" placeholder="What was this for?" required /></div>
+        <div class="field"><label>Category</label><select id="expCategory" required></select></div>
+        <div class="field"><label>Vendor / Payee</label><input type="text" id="expVendor" /></div>
+        <div class="field"><label>Amount (SGD)</label><input type="number" id="expAmount" step="0.01" min="0" required /></div>
+        <div class="field"><label>Reference</label><input type="text" id="expRef" placeholder="Receipt / Ref no." /></div>
+        <div class="field" style="grid-column:1/-1;"><label>Upload Receipt / Invoice (image or PDF)</label><input type="file" id="expFile" accept="image/*,application/pdf" /></div>
+        <div><button class="primary" type="submit">Add Expense</button></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <h2 style="margin:0;">Expenses</h2>
+        <div class="filter-row" style="margin:0;">
+          <input type="search" id="expSearch" placeholder="Search..." oninput="renderExpenses()" />
+          <select id="expCatFilter" onchange="renderExpenses()">
+            <option value="">All categories</option>
+          </select>
+        </div>
+      </div>
+      <div style="overflow-x:auto"><table id="expTable">
+        <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Vendor</th><th>Ref</th><th class="num">Amount</th><th>Receipt</th><th></th></tr></thead>
+        <tbody></tbody>
+        <tfoot><tr><td colspan="5" style="text-align:right;font-weight:600;">Total</td><td class="num" id="expTotal" style="font-weight:600;">SGD 0</td><td colspan="2"></td></tr></tfoot>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="view" id="view-products">
+    <div class="card">
+      <h2>Add Product</h2>
+      <form id="prodForm" onsubmit="addProduct(event)">
+        <div class="field"><label>SKU / Product Code</label><input type="text" id="prodSku" placeholder="e.g. PKM-ETB-Q1" required /></div>
+        <div class="field"><label>Product Name</label><input type="text" id="prodName" placeholder="Product description" required /></div>
+        <div class="field"><label>Unit Price (SGD)</label><input type="number" id="prodPrice" step="0.01" min="0" required /></div>
+        <div class="field"><label>Opening Stock</label><input type="number" id="prodStock" step="1" min="0" value="0" /></div>
+        <div class="field"><label>Low Stock Alert</label><input type="number" id="prodMinStock" step="1" min="0" value="5" /></div>
+        <div><button class="primary" type="submit">Add Product</button></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <h2 style="margin:0;">Products &amp; Inventory</h2>
+        <div class="filter-row" style="margin:0;">
+          <input type="search" id="prodSearch" placeholder="Search SKU or name..." oninput="renderProducts()" />
+        </div>
+      </div>
+      <div style="overflow-x:auto"><table id="prodTable">
+        <thead><tr><th>SKU</th><th>Name</th><th class="num">Price</th><th class="num">Stock</th><th class="num">Stock Value</th><th>Status</th><th></th></tr></thead>
+        <tbody></tbody>
+        <tfoot><tr><td colspan="4" style="text-align:right;font-weight:600;">Total Stock Value</td><td class="num" id="prodTotalValue" style="font-weight:600;">SGD 0</td><td colspan="2"></td></tr></tfoot>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- REPORTS -->
+  <section class="view" id="view-reports">
+    <div class="card">
+      <h2>Profit &amp; Loss Statement</h2>
+      <div class="filter-row">
+        <label style="font-size:13px;color:#6b7280;">From</label>
+        <input type="date" id="plFrom" onchange="renderPL()" />
+        <label style="font-size:13px;color:#6b7280;">To</label>
+        <input type="date" id="plTo" onchange="renderPL()" />
+        <button class="ghost" onclick="setPLThisYear()">This Year</button>
+        <button class="ghost" onclick="setPLThisMonth()">This Month</button>
+      </div>
+      <div id="plReport"></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ---------- Categories (from your existing expense sheet) ----------
+const CATEGORIES = [
+  "COGS - Product","Logistics","Import Tax","Bank Charges",
+  "Consumable Cost","Rental","Stationery","Travelling",
+  "Accommodation","Parking","Refreshment","Professional Fees"
+];
+
+// ---------- Login ----------
+const LOGIN_PASSWORD = "welucky666";  // change this to your own password
+const LOGIN_KEY = "welucky_auth";
+
+function doLogin(e) {
+  e.preventDefault();
+  const pw = document.getElementById("loginPassword").value;
+  if (pw === LOGIN_PASSWORD) {
+    sessionStorage.setItem(LOGIN_KEY, "1");
+    document.getElementById("loginOverlay").style.display = "none";
+  } else {
+    document.getElementById("loginError").style.display = "block";
+    document.getElementById("loginPassword").value = "";
+  }
+}
+function doLogout() {
+  sessionStorage.removeItem(LOGIN_KEY);
+  location.reload();
+}
+function checkAuth() {
+  if (sessionStorage.getItem(LOGIN_KEY) === "1") {
+    document.getElementById("loginOverlay").style.display = "none";
+  }
+}
+checkAuth();
+
+// ---------- Preloaded invoices (from WE LUCKY TCG INVOICE TRACKING.xlsx) ----------
+const PRELOADED_INVOICES = [{"date":"2026-02-21","no":"20260001","customer":"CHONG YONGYU, KELVIN","amount":280,"status":"Paid","notes":"PKM TCG Q1 ELITE TRAINER BOX 10-10315-101 (2 UNITS)"},{"date":"2026-02-21","no":"20260002","customer":"CHONG KAR KIT","amount":1388,"status":"Paid","notes":"PKM TCG Q1 ELITE TRAINER BOX 10-10315-101 (10 UNITS)"},{"date":"2026-02-21","no":"20260003","customer":"DARREN LIM","amount":520,"status":"Paid","notes":"PKM TCG Q1 ELITE TRAINER BOX 10-10315-101 (4 UNITS)"},{"date":"2026-02-21","no":"20260004","customer":"LEOH YING QIU","amount":280,"status":"Paid","notes":"PKM TCG Q1 ELITE TRAINER BOX 10-10315-101 (2 UNITS)"},{"date":"2026-02-21","no":"20260005","customer":"EXZEN TCG","amount":4164,"status":"Paid","notes":"PKM TCG Q1 ELITE TRAINER BOX 10-10315-101 (30 UNITS)"},{"date":"2026-02-21","no":"20260006","customer":"WOOPA! POKE SERVICES","amount":6888,"status":"Paid","notes":"PKM TCG Q1 ELITE TRAINER BOX 10-10315-101 (50 UNITS)"},{"date":"2026-03-29","no":"20260007","customer":"ZHOU WEI ZHANG","amount":2868,"status":"Paid","notes":"Pokemon TCG ME03 Booster 36 CT Display (216 units); Pokemon TCG ME03 Elite Trainer Box (10 units)"},{"date":"2026-03-29","no":"20260008","customer":"Abraham Hutomo","amount":1463,"status":"Paid","notes":"Pokemon TCG ME03 Boosters (Sleeved) (144 units); Pokemon TCG ME03 6 Boosters Bundle (5 units)"},{"date":"2026-03-29","no":"20260009","customer":"Quick John Michael","amount":1218,"status":"Paid","notes":"Pokemon TCG ME03 Boosters (Sleeved) (144 units)"},{"date":"2026-03-29","no":"20260010","customer":"Yeo Wei Lie, William","amount":285,"status":"Paid","notes":"Pokemon TCG ME03 Booster 36 CT Display (36 unit)"},{"date":"2026-03-29","no":"20260011","customer":"Lee Kok Wei, Vincent","amount":1390,"status":"Paid","notes":"Pokemon TCG ME03 Booster 36 CT Display (108 unit); Pokemon TCG ME03 Booster 18 CT Display (72 units)"},{"date":"2026-03-29","no":"20260012","customer":"Y TCG","amount":5255,"status":"Paid","notes":"Pokemon TCG ME03 Elite Trainer Box (20 units); Pokemon TCG ME03 6 Boosters Bundle (5 units); Pokemon TCG ME03 Booster 18 CT Display (216 units); Pokemon TCG ME03 Booster 18 CT Display (144 units)"},{"date":"2026-03-29","no":"20260013","customer":"Marcos Wee","amount":280,"status":"Paid","notes":"Pokemon TCG ME03 Booster 36 CT Display (36 unit)"},{"date":"2026-03-29","no":"20260014","customer":"TCG","amount":280,"status":"Paid","notes":"Pokemon TCG ME03 Booster 36 CT Display (36 unit)"},{"date":"2026-04-25","no":"20260015","customer":"Morteen (Carousell)","amount":12000,"status":"Paid","notes":"Pokemon TCG ME2.5 Boosters Bundle (120 Units)"},{"date":"2026-05-02","no":"20260016","customer":"Walk In Customer","amount":125,"status":"Paid","notes":"Pokemon TCG MEGA CHARIZARD X & Y TINS"},{"date":"2026-05-03","no":"20260017","customer":"Walk In Customer","amount":130,"status":"Paid","notes":"Pokemon TCG MEGA CHARIZARD X & Y TINS"},{"date":"2026-05-03","no":"20260018","customer":"Walk In Customer","amount":125,"status":"Paid","notes":"Pokemon TCG MEGA CHARIZARD X & Y TINS"},{"date":"2026-05-03","no":"20260019","customer":"Walk In Customer","amount":1000,"status":"Paid","notes":"Pokemon TCG ME2.5 Boosters Bundle (10 Units)"},{"date":"2026-05-03","no":"20260020","customer":"Walk In Customer","amount":1000,"status":"Paid","notes":"Pokemon TCG ME2.5 Boosters Bundle (10 Units)"},{"date":"2026-05-20","no":"20260021","customer":"SONY TCG","amount":6000,"status":"Paid","notes":"Pokemon TCG ME2.5 Boosters Bundle (60 Units)"},{"date":"2026-05-11","no":"20260022","customer":"Y TCG","amount":256,"status":"Paid","notes":"PSA10 25th Anniversary Cleffa Slab; PSA10 25th Anniversary Zapdos Slab"},{"date":"2026-05-11","no":"20260023","customer":"Y TCG","amount":620,"status":"Paid","notes":"PSA10 25th Anniversary Zekrom Slab; PSA10 25th Anniversary Reshiram Slab"},{"date":"2026-05-11","no":"20260024","customer":"Marcos","amount":1000,"status":"Paid","notes":"Pokemon TCG ME2.5 Boosters Bundle (10 Units)"},{"date":"2026-05-12","no":"20260025","customer":"Y TCG","amount":7485,"status":"Paid","notes":"Pokemon TCG ME2.5 Boosters Bundle (60 Units); PKM TCG PREMIUM EX BOX 26Q2 10-10359-108 US (18 units)"},{"date":"2026-05-22","no":"20260026","customer":"SONYS TCG","amount":2900,"status":"Paid","notes":"Pokemon TCG ME04 Boosters (Sleeved) (144 units); Pokemon TCG ME04 6 Bossters Bundle (25 units)"},{"date":"2026-05-22","no":"20260027","customer":"HNG JAMES","amount":335,"status":"Paid","notes":"Pokemon TCG ME04 Booster 36 CT Display (36 units)"},{"date":"2026-05-22","no":"20260028","customer":"KADRIAN SIM","amount":1950,"status":"Paid","notes":"Pokemon TCG ME04 Booster 36 CT Display (216 units)"},{"date":"2026-05-22","no":"20260029","customer":"KELVIN MAUNG","amount":1600,"status":"Paid","notes":"Pokemon TCG ME04 6 Bossters Bundle (25 units)"},{"date":"2026-05-23","no":"20260030","customer":"CHONG KAR KIT","amount":660,"status":"Paid","notes":"Pokemon TCG ME04 Booster 36 CT Display (36 units)"},{"date":"2026-05-23","no":"20260031","customer":"ARKA DIMITRIE","amount":3600,"status":"Paid","notes":"Pokemon TCG ME04 Booster 36 CT Display (216 units); Pokemon TCG ME04 6 Bossters Bundle (25 units)"},{"date":"2026-05-23","no":"20260032","customer":"LOW JING YI","amount":335,"status":"Paid","notes":"Pokemon TCG ME04 Booster 36 CT Display (36units)"},{"date":"2026-05-23","no":"20260033","customer":"ASHH21","amount":158,"status":"Paid","notes":"Pokemon TCG ME04 Booster 18 CT Display (18 units)"},{"date":"2026-05-23","no":"20260034","customer":"JEREMIAH YC","amount":2000,"status":"Paid","notes":"Pokemon TCG ME04 Booster 36 CT Display (216 units)"},{"date":"2026-05-23","no":"20260035","customer":"MARCOS","amount":330,"status":"Paid","notes":"Pokemon TCG ME04 Booster 36 CT Display (36 units)"},{"date":"2026-05-23","no":"20260036","customer":"RINO OON","amount":335,"status":"Paid","notes":"Pokemon TCG ME04 Booster 36 CT Display (36 units)"},{"date":"2026-05-23","no":"20260037","customer":"JACKSON8999 - ROSS","amount":1368,"status":"Paid","notes":"Pokemon TCG ME04 Boosters (Sleeved) (144 units)"},{"date":"2026-05-23","no":"20260038","customer":"ELTON HO","amount":1500,"status":"Paid","notes":"Pokemon TCG ME04 Elite Trainer Box (10 units)"},{"date":"2026-05-23","no":"20260039","customer":"ERIC6996","amount":1450,"status":"Paid","notes":"Pokemon TCG ME04 Elite Trainer Box (10 units)"},{"date":"2026-05-23","no":"20260040","customer":"RIO","amount":5170,"status":"Paid","notes":"Pokemon TCG ME04 Booster 36 CT Display (216 units); Pokemon TCG ME04 Boosters (Sleeved) (144 units); Pokemon TCG ME04 Booster 18 CT Display (216 units)"},{"date":"2026-05-23","no":"20260041","customer":"MUHD AFHAM","amount":1850,"status":"Paid","notes":"Pokemon TCG ME04 Booster 18 CT Display (216 units)"},{"date":"2026-05-23","no":"20260042","customer":"PIKAMOMO","amount":1400,"status":"Paid","notes":"Pokemon TCG ME04 Boosters (Sleeved) (144 units)"},{"date":"2026-05-23","no":"20260043","customer":"EUGENE YYM","amount":13225,"status":"Paid","notes":"Pokemon TCG ME04 Booster 36 CT Display (864 units); Pokemon TCG ME04 Booster 18 CT Display (648 units)"},{"date":"2026-05-23","no":"20260044","customer":"JACKSON8999 - ROSS","amount":1368,"status":"Paid","notes":"Pokemon TCG ME04 Boosters (Sleeved) (144 units)"},{"date":"2026-05-24","no":"20260045","customer":"DARREN - CLUTCHTHREEPOINTERS","amount":308,"status":"Paid","notes":"Pokemon TCG ME04 Booster 18 CT Display (36 units)"},{"date":"2026-05-24","no":"20260046","customer":"WALTER","amount":155,"status":"Paid","notes":"Pokemon TCG ME04 Booster 18 CT Display (18 units)"},{"date":"2026-05-24","no":"20260047","customer":"AXL TEO","amount":158,"status":"Paid","notes":"Pokemon TCG ME04 Booster 18 CT Display (18 units)"},{"date":"2026-05-25","no":"20260048","customer":"MAGGSSSS","amount":155,"status":"Paid","notes":"Pokemon TCG ME04 Booster 18 CT Display (18 units)"},{"date":"2026-05-25","no":"20260049","customer":"IVAN","amount":328,"status":"Paid","notes":"Pokemon TCG ME04 Booster 36 CT Display (36 units)"},{"date":"2026-05-26","no":"20260050","customer":"IVAN","amount":3700,"status":"Paid","notes":"Pokemon TCG ME04 Booster 36 CT Display (432 units)"},{"date":"2026-05-26","no":"20260051","customer":"TEXAS_JACK","amount":158,"status":"Paid","notes":"Pokemon TCG ME04 Booster 18 CT Display (18 units)"},{"date":"2026-05-26","no":"20260052","customer":"POKE SIS","amount":158,"status":"Paid","notes":"Pokemon TCG ME04 Booster 18 CT Display (18 units)"},{"date":"2026-05-26","no":"20260053","customer":"IVAN","amount":310,"status":"Paid","notes":"Pokemon TCG ME04 Booster 18 CT Display (36 units)"},{"date":"2026-05-26","no":"20260054","customer":"AGENTMAS","amount":158,"status":"Paid","notes":"Pokemon TCG ME04 Booster 18 CT Display (18 units)"},{"date":"2026-05-26","no":"20260055","customer":"SPY28","amount":155,"status":"Paid","notes":"Pokemon TCG ME04 Booster 18 CT Display (18 units)"},{"date":"2026-05-26","no":"20260056","customer":"Muhd Zaki","amount":300,"status":"Paid","notes":"Pokemon TCG ME04 Booster 18 CT Display (36 units)"},{"date":"2026-05-26","no":"20260057","customer":"Muhd Hanafi","amount":1800,"status":"Paid","notes":"Pokemon TCG ME04 Booster 18 CT Display (216 units)"},{"date":"2026-05-27","no":"20260058","customer":"Prince","amount":1350,"status":"Paid","notes":"Pokemon TCG ME04 Booster 18 CT Display (162 units)"},{"date":"2026-05-27","no":"20260059","customer":"KEITH TAY","amount":6650,"status":"Paid","notes":"Pokemon TCG ME04 Booster 18 CT Display (648 units); Pokemon TCG ME04 Boosters (Sleeved) (144 units)"},{"date":"2026-05-28","no":"20260060","customer":"KEITH TAY","amount":5000,"status":"Paid","notes":"Pokemon TCG ME04 Boosters (Sleeved) (144 units)"}];
+
+function loadPreloaded() {
+  const existing = new Set(store.invoices.map(i => i.no));
+  const toAdd = PRELOADED_INVOICES.filter(i => !existing.has(i.no));
+  if (!toAdd.length) { alert("All 60 invoices are already loaded."); return; }
+  if (!confirm(`Add ${toAdd.length} invoice(s) from WE LUCKY TCG INVOICE TRACKING.xlsx?`)) return;
+  toAdd.forEach(i => store.invoices.push({...i, id: uid()}));
+  save();
+  renderInvoices(); renderDashboard();
+  alert(`Loaded ${toAdd.length} invoices. Total revenue: SGD ${toAdd.reduce((s,i)=>s+i.amount,0).toLocaleString()}`);
+}
+
+// ---------- Supabase (cloud sync) ----------
+const SUPABASE_URL = "https://ghclrsuikjvacnparmhz.supabase.co";
+const SUPABASE_KEY = "sb_publishable_vhnIF1b0aB6utkWOlUqb7g_cPmctuv9";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const KEY = "welucky_accounting_v1";  // local cache fallback
+let store = { invoices: [], expenses: [], products: [] };
+let cloudReady = false;
+
+// Field mappers between camelCase (app) and snake_case (DB)
+function invFromDB(r) { return { id: r.id, date: r.date, no: r.no, customer: r.customer, amount: Number(r.amount)||0, status: r.status, notes: r.notes, lineItems: r.line_items || [] }; }
+function invToDB(i)   { return { id: i.id, date: i.date, no: i.no, customer: i.customer, amount: i.amount, status: i.status, notes: i.notes, line_items: i.lineItems || [] }; }
+function expFromDB(r) { return { id: r.id, date: r.date, description: r.description, category: r.category, vendor: r.vendor, amount: Number(r.amount)||0, ref: r.reference, receiptUrl: r.receipt_url || "" }; }
+function expToDB(x)   { return { id: x.id, date: x.date, description: x.description, category: x.category, vendor: x.vendor, amount: x.amount, reference: x.ref, receipt_url: x.receiptUrl || null }; }
+function prodFromDB(r){ return { id: r.id, sku: r.sku, name: r.name, price: Number(r.price)||0, stock: Number(r.stock)||0, minStock: Number(r.min_stock)||0 }; }
+function prodToDB(p)  { return { id: p.id, sku: p.sku, name: p.name, price: p.price, stock: p.stock, min_stock: p.minStock }; }
+
+async function cloudLoad() {
+  try {
+    const [inv, exp, prod] = await Promise.all([
+      sb.from('invoices').select('*').order('date', {ascending:false}),
+      sb.from('expenses').select('*').order('date', {ascending:false}),
+      sb.from('products').select('*').order('sku', {ascending:true}),
+    ]);
+    if (inv.error) throw inv.error;
+    if (exp.error) throw exp.error;
+    if (prod.error) throw prod.error;
+    store.invoices = (inv.data||[]).map(invFromDB);
+    store.expenses = (exp.data||[]).map(expFromDB);
+    store.products = (prod.data||[]).map(prodFromDB);
+    cloudReady = true;
+    save();  // cache locally
+  } catch (e) {
+    console.error("Cloud load failed:", e);
+    alert("⚠️ Could not connect to cloud. Working in offline mode — changes may not sync. Error: " + e.message);
+    // fallback to local cache
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) store = JSON.parse(raw);
+    } catch(e) {}
+  }
+}
+
+function save() { localStorage.setItem(KEY, JSON.stringify(store)); }
+
+async function cloudUpsertInvoice(inv)  { await sb.from('invoices').upsert(invToDB(inv)); }
+async function cloudDeleteInvoice(id)   { await sb.from('invoices').delete().eq('id', id); }
+async function cloudUpsertExpense(x)    { await sb.from('expenses').upsert(expToDB(x)); }
+async function cloudDeleteExpense(id)   { await sb.from('expenses').delete().eq('id', id); }
+async function cloudUpsertProduct(p)    { await sb.from('products').upsert(prodToDB(p)); }
+async function cloudDeleteProduct(id)   { await sb.from('products').delete().eq('id', id); }
+
+function subscribeRealtime() {
+  sb.channel('welucky-sync')
+    .on('postgres_changes', {event:'*', schema:'public', table:'invoices'}, async () => {
+      const { data } = await sb.from('invoices').select('*').order('date',{ascending:false});
+      store.invoices = (data||[]).map(invFromDB); save();
+      renderInvoices(); renderDashboard();
+    })
+    .on('postgres_changes', {event:'*', schema:'public', table:'expenses'}, async () => {
+      const { data } = await sb.from('expenses').select('*').order('date',{ascending:false});
+      store.expenses = (data||[]).map(expFromDB); save();
+      renderExpenses(); renderDashboard();
+    })
+    .on('postgres_changes', {event:'*', schema:'public', table:'products'}, async () => {
+      const { data } = await sb.from('products').select('*').order('sku',{ascending:true});
+      store.products = (data||[]).map(prodFromDB); save();
+      renderProducts();
+    })
+    .subscribe();
+}
+
+async function migrateLocalToCloud() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return false;
+    const local = JSON.parse(raw);
+    if (!local.invoices?.length && !local.expenses?.length && !local.products?.length) return false;
+    // Check if cloud is empty
+    const { count } = await sb.from('invoices').select('*', {count:'exact', head:true});
+    if ((count || 0) > 0) return false;
+    if (!confirm(`Upload your ${local.invoices?.length||0} invoices, ${local.expenses?.length||0} expenses, ${local.products?.length||0} products to the cloud now?`)) return false;
+    if (local.invoices?.length) {
+      // strip locally-generated string ids so DB can assign uuids
+      const rows = local.invoices.map(i => { const {id, ...rest} = invToDB(i); return rest; });
+      await sb.from('invoices').insert(rows);
+    }
+    if (local.expenses?.length) {
+      const rows = local.expenses.map(x => { const {id, ...rest} = expToDB(x); return rest; });
+      await sb.from('expenses').insert(rows);
+    }
+    if (local.products?.length) {
+      const rows = local.products.map(p => { const {id, ...rest} = prodToDB(p); return rest; });
+      await sb.from('products').insert(rows);
+    }
+    return true;
+  } catch (e) {
+    console.error("Migration failed:", e);
+    return false;
+  }
+}
+
+// ---------- Helpers ----------
+const fmt = n => "SGD " + (Number(n)||0).toLocaleString("en-SG", {minimumFractionDigits:2, maximumFractionDigits:2});
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const todayISO = () => new Date().toISOString().slice(0,10);
+const monthKey = d => d.slice(0,7);
+
+function inRange(dateStr, from, to) {
+  if (from && dateStr < from) return false;
+  if (to && dateStr > to) return false;
+  return true;
+}
+
+function periodRange(p) {
+  const today = new Date();
+  const y = today.getFullYear(), m = today.getMonth();
+  if (p === "all") return [null, null];
+  if (p === "ytd") return [`${y}-01-01`, todayISO()];
+  if (p === "month") {
+    const from = new Date(y, m, 1).toISOString().slice(0,10);
+    return [from, todayISO()];
+  }
+  if (p === "lastmonth") {
+    const from = new Date(y, m-1, 1).toISOString().slice(0,10);
+    const to = new Date(y, m, 0).toISOString().slice(0,10);
+    return [from, to];
+  }
+  return [null, null];
+}
+
+// ---------- Navigation ----------
+document.querySelectorAll("nav button").forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll("nav button").forEach(x => x.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    document.getElementById("view-" + b.dataset.view).classList.add("active");
+    if (b.dataset.view === "dashboard") renderDashboard();
+    if (b.dataset.view === "reports") renderPL();
+    if (b.dataset.view === "products") renderProducts();
+  };
+});
+
+// ---------- Products / Inventory ----------
+async function addProduct(e) {
+  e.preventDefault();
+  const sku = prodSku.value.trim();
+  if (store.products.some(p => p.sku.toLowerCase() === sku.toLowerCase())) {
+    alert("A product with this SKU already exists.");
+    return;
+  }
+  const p = {
+    id: crypto.randomUUID(),
+    sku: sku,
+    name: prodName.value.trim(),
+    price: parseFloat(prodPrice.value) || 0,
+    stock: parseInt(prodStock.value) || 0,
+    minStock: parseInt(prodMinStock.value) || 0,
+  };
+  store.products.push(p);
+  save();
+  await cloudUpsertProduct(p);
+  e.target.reset();
+  prodMinStock.value = 5;
+  renderProducts();
+}
+async function deleteProduct(id) {
+  if (!confirm("Delete this product? Existing invoice line items keep their data.")) return;
+  store.products = store.products.filter(x => x.id !== id);
+  save();
+  await cloudDeleteProduct(id);
+  renderProducts();
+}
+async function adjustStock(id) {
+  const p = store.products.find(x => x.id === id); if (!p) return;
+  const v = prompt(`Stock In / Adjust for ${p.name}\nCurrent stock: ${p.stock}\nEnter quantity to ADD (negative to reduce):`, "");
+  if (v === null || v === "") return;
+  const n = parseInt(v); if (isNaN(n)) { alert("Invalid number"); return; }
+  p.stock += n; if (p.stock < 0) p.stock = 0;
+  save();
+  await cloudUpsertProduct(p);
+  renderProducts();
+}
+function renderProducts() {
+  const tbody = document.querySelector("#prodTable tbody");
+  const q = (prodSearch.value || "").toLowerCase();
+  const rows = store.products
+    .filter(p => !q || (p.sku + " " + p.name).toLowerCase().includes(q))
+    .sort((a,b) => a.sku.localeCompare(b.sku));
+  let totalValue = 0;
+  tbody.innerHTML = rows.length ? rows.map(p => {
+    const value = p.price * p.stock; totalValue += value;
+    const low = p.stock <= p.minStock;
+    const statusPill = p.stock <= 0
+      ? `<span class="pill" style="background:#fee2e2;color:#b91c1c;">Out of Stock</span>`
+      : low
+        ? `<span class="pill" style="background:#fef3c7;color:#92400e;">Low Stock</span>`
+        : `<span class="pill" style="background:#dcfce7;color:#166534;">In Stock</span>`;
+    return `<tr>
+      <td><strong>${escapeHTML(p.sku)}</strong></td>
+      <td>${escapeHTML(p.name)}</td>
+      <td class="num">${fmt(p.price)}</td>
+      <td class="num">${p.stock}</td>
+      <td class="num">${fmt(value)}</td>
+      <td>${statusPill}</td>
+      <td>
+        <button class="ghost" style="padding:5px 10px;font-size:12px;margin-right:4px;" onclick="adjustStock('${p.id}')">Stock +/-</button>
+        <button class="danger" onclick="deleteProduct('${p.id}')">Delete</button>
+      </td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="7" class="empty">No products yet — add one above.</td></tr>`;
+  prodTotalValue.textContent = fmt(totalValue);
+}
+
+// ---------- Line Items (invoice form) ----------
+function addLineItem() {
+  if (!store.products.length) {
+    alert("Add products first in the Products tab.");
+    return;
+  }
+  const div = document.createElement("div");
+  div.className = "line-item";
+  div.style.cssText = "display:grid;grid-template-columns:2fr 80px 110px 110px 30px;gap:8px;margin-bottom:8px;align-items:center;";
+  div.innerHTML = `
+    <select onchange="onLineProductChange(this)" style="padding:7px 9px;font-size:13px;">
+      <option value="">— Select product —</option>
+      ${store.products.map(p => `<option value="${p.id}" data-price="${p.price}">${escapeHTML(p.sku)} — ${escapeHTML(p.name)} (stock: ${p.stock})</option>`).join("")}
+    </select>
+    <input type="number" class="li-qty" placeholder="Qty" min="1" step="1" value="1" oninput="recalcLineItems()" style="padding:7px 9px;font-size:13px;" />
+    <input type="number" class="li-price" placeholder="Price" step="0.01" min="0" oninput="recalcLineItems()" style="padding:7px 9px;font-size:13px;" />
+    <span class="li-subtotal num" style="font-size:13px;font-weight:600;color:#374151;">SGD 0.00</span>
+    <button type="button" onclick="this.parentElement.remove();recalcLineItems();" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:4px;cursor:pointer;font-size:14px;width:24px;height:24px;">×</button>
+  `;
+  invLineItems.appendChild(div);
+}
+function onLineProductChange(sel) {
+  const opt = sel.options[sel.selectedIndex];
+  const row = sel.closest(".line-item");
+  if (opt.dataset.price) row.querySelector(".li-price").value = opt.dataset.price;
+  recalcLineItems();
+}
+function recalcLineItems() {
+  let total = 0;
+  const descriptions = [];
+  document.querySelectorAll("#invLineItems .line-item").forEach(row => {
+    const qty = parseFloat(row.querySelector(".li-qty").value) || 0;
+    const price = parseFloat(row.querySelector(".li-price").value) || 0;
+    const sub = qty * price;
+    row.querySelector(".li-subtotal").textContent = fmt(sub);
+    total += sub;
+    const sel = row.querySelector("select");
+    if (sel.value && qty > 0) {
+      const p = store.products.find(x => x.id === sel.value);
+      if (p) descriptions.push(`${p.name} (${qty} units)`);
+    }
+  });
+  if (document.querySelectorAll("#invLineItems .line-item").length > 0) {
+    invAmount.value = total.toFixed(2);
+    if (descriptions.length) invNotes.value = descriptions.join("; ");
+  }
+}
+function getLineItemsData() {
+  const items = [];
+  document.querySelectorAll("#invLineItems .line-item").forEach(row => {
+    const sel = row.querySelector("select");
+    const qty = parseInt(row.querySelector(".li-qty").value) || 0;
+    const price = parseFloat(row.querySelector(".li-price").value) || 0;
+    if (sel.value && qty > 0) {
+      const p = store.products.find(x => x.id === sel.value);
+      if (p) items.push({ productId: sel.value, sku: p.sku, name: p.name, qty, price });
+    }
+  });
+  return items;
+}
+
+// ---------- Invoices ----------
+function nextInvoiceNo() {
+  const nums = store.invoices
+    .map(i => parseInt(String(i.no).replace(/\D/g, ""), 10))
+    .filter(n => !isNaN(n));
+  const next = (nums.length ? Math.max(...nums) : 20260000) + 1;
+  return String(next);
+}
+function fillNextInvoiceNo() {
+  if (invNo) invNo.value = nextInvoiceNo();
+}
+
+let editingInvoiceId = null;
+let editingExpenseId = null;
+
+function editInvoice(id) {
+  const inv = store.invoices.find(x => x.id === id);
+  if (!inv) return;
+  editingInvoiceId = id;
+  invDate.value = inv.date;
+  invNo.value = inv.no;
+  invCustomer.value = inv.customer || "";
+  invAmount.value = inv.amount;
+  invStatus.value = inv.status || "Paid";
+  invNotes.value = inv.notes || "";
+  invLineItems.innerHTML = "";  // clear — user can re-add if needed (won't re-deduct stock)
+  const btn = document.querySelector("#invForm button[type=submit]");
+  btn.textContent = "Update Invoice";
+  btn.style.background = "linear-gradient(135deg,#fcd34d,#f59e0b)";
+  btn.style.color = "#000";
+  // scroll to form
+  document.getElementById("invForm").scrollIntoView({behavior:"smooth", block:"start"});
+  // add cancel link
+  if (!document.getElementById("cancelInvEdit")) {
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.id = "cancelInvEdit";
+    cancel.className = "ghost";
+    cancel.style.marginLeft = "8px";
+    cancel.textContent = "Cancel Edit";
+    cancel.onclick = cancelInvoiceEdit;
+    btn.parentElement.appendChild(cancel);
+  }
+}
+function cancelInvoiceEdit() {
+  editingInvoiceId = null;
+  document.getElementById("invForm").reset();
+  invDate.value = todayISO();
+  invLineItems.innerHTML = "";
+  fillNextInvoiceNo();
+  const btn = document.querySelector("#invForm button[type=submit]");
+  btn.textContent = "Add Invoice";
+  btn.style.background = "";
+  btn.style.color = "";
+  const cancel = document.getElementById("cancelInvEdit");
+  if (cancel) cancel.remove();
+}
+
+function editExpense(id) {
+  const x = store.expenses.find(e => e.id === id);
+  if (!x) return;
+  editingExpenseId = id;
+  expDate.value = x.date;
+  expDesc.value = x.description || "";
+  expCategory.value = x.category || "";
+  expVendor.value = x.vendor || "";
+  expAmount.value = x.amount;
+  expRef.value = x.ref || "";
+  const btn = document.querySelector("#expForm button[type=submit]");
+  btn.textContent = "Update Expense";
+  btn.style.background = "linear-gradient(135deg,#fcd34d,#f59e0b)";
+  btn.style.color = "#000";
+  document.getElementById("expForm").scrollIntoView({behavior:"smooth", block:"start"});
+  if (!document.getElementById("cancelExpEdit")) {
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.id = "cancelExpEdit";
+    cancel.className = "ghost";
+    cancel.style.marginLeft = "8px";
+    cancel.textContent = "Cancel Edit";
+    cancel.onclick = cancelExpenseEdit;
+    btn.parentElement.appendChild(cancel);
+  }
+}
+function cancelExpenseEdit() {
+  editingExpenseId = null;
+  document.getElementById("expForm").reset();
+  expDate.value = todayISO();
+  const btn = document.querySelector("#expForm button[type=submit]");
+  btn.textContent = "Add Expense";
+  btn.style.background = "";
+  btn.style.color = "";
+  const cancel = document.getElementById("cancelExpEdit");
+  if (cancel) cancel.remove();
+}
+
+async function addInvoice(e) {
+  e.preventDefault();
+  // EDIT MODE
+  if (editingInvoiceId) {
+    const inv = store.invoices.find(x => x.id === editingInvoiceId);
+    if (inv) {
+      inv.date = invDate.value;
+      inv.no = invNo.value.trim();
+      inv.customer = invCustomer.value.trim();
+      inv.amount = parseFloat(invAmount.value) || 0;
+      inv.status = invStatus.value;
+      inv.notes = invNotes.value.trim();
+      save();
+      await cloudUpsertInvoice(inv);
+    }
+    cancelInvoiceEdit();
+    renderInvoices();
+    renderDashboard();
+    return;
+  }
+  const items = getLineItemsData();
+  const stockProblems = [];
+  items.forEach(it => {
+    const p = store.products.find(x => x.id === it.productId);
+    if (p && p.stock < it.qty) stockProblems.push(`${p.name}: need ${it.qty}, have ${p.stock}`);
+  });
+  if (stockProblems.length) {
+    if (!confirm("Insufficient stock for:\n" + stockProblems.join("\n") + "\n\nProceed anyway? Stock will go negative.")) return;
+  }
+  for (const it of items) {
+    const p = store.products.find(x => x.id === it.productId);
+    if (p) { p.stock -= it.qty; await cloudUpsertProduct(p); }
+  }
+  const inv = {
+    id: crypto.randomUUID(),
+    date: invDate.value,
+    no: invNo.value.trim(),
+    customer: invCustomer.value.trim(),
+    amount: parseFloat(invAmount.value) || 0,
+    status: invStatus.value,
+    notes: invNotes.value.trim(),
+    lineItems: items,
+  };
+  store.invoices.push(inv);
+  save();
+  await cloudUpsertInvoice(inv);
+  e.target.reset();
+  invDate.value = todayISO();
+  invLineItems.innerHTML = "";
+  fillNextInvoiceNo();
+  renderInvoices();
+}
+function numberToWords(n) {
+  if (n === 0) return "ZERO";
+  const ones = ["","ONE","TWO","THREE","FOUR","FIVE","SIX","SEVEN","EIGHT","NINE","TEN","ELEVEN","TWELVE","THIRTEEN","FOURTEEN","FIFTEEN","SIXTEEN","SEVENTEEN","EIGHTEEN","NINETEEN"];
+  const tens = ["","","TWENTY","THIRTY","FORTY","FIFTY","SIXTY","SEVENTY","EIGHTY","NINETY"];
+  function under1000(num) {
+    let s = "";
+    if (num >= 100) { s += ones[Math.floor(num/100)] + " HUNDRED "; num %= 100; }
+    if (num >= 20) { s += tens[Math.floor(num/10)] + " "; num %= 10; }
+    if (num > 0) s += ones[num] + " ";
+    return s.trim();
+  }
+  let dollars = Math.floor(n);
+  let cents = Math.round((n - dollars) * 100);
+  let result = "";
+  if (dollars >= 1000000) { result += under1000(Math.floor(dollars/1000000)) + " MILLION "; dollars %= 1000000; }
+  if (dollars >= 1000) { result += under1000(Math.floor(dollars/1000)) + " THOUSAND "; dollars %= 1000; }
+  if (dollars > 0) result += under1000(dollars);
+  result = result.trim() + " ONLY";
+  if (cents > 0) result = result.replace(" ONLY", "") + " AND CENTS " + under1000(cents) + " ONLY";
+  return result;
+}
+
+function generateInvoice(id) {
+  const inv = store.invoices.find(x => x.id === id);
+  if (!inv) return;
+  const items = (inv.notes || "").split(/;\s*/).filter(Boolean);
+  const dateFormatted = inv.date ? inv.date.split("-").reverse().join("/") : "";
+  const amountWords = numberToWords(inv.amount);
+  const itemRows = items.length
+    ? items.map(it => `<tr><td></td><td>${escapeHTML(it)}</td><td class="num"></td></tr>`).join("")
+        + `<tr><td></td><td><strong>${items.length === 1 ? "" : "Items as above"}</strong></td><td class="num">${inv.amount.toLocaleString("en-SG",{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`
+    : `<tr><td></td><td>${escapeHTML(inv.notes || "")}</td><td class="num">${inv.amount.toLocaleString("en-SG",{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`;
+
+  const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Invoice IV-${inv.no}</title>
+<style>
+  @page { size: A4; margin: 15mm; }
+  body { font-family: Arial, sans-serif; color: #000; font-size: 13px; max-width: 800px; margin: 0 auto; padding: 20px; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
+  .company { text-align: right; font-weight: bold; line-height: 1.4; }
+  .company .name { font-size: 16px; }
+  h1 { font-size: 24px; margin: 0 0 20px; letter-spacing: 1px; }
+  .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 25px; }
+  .meta .row { display: flex; padding: 4px 0; }
+  .meta .row .label { font-weight: bold; min-width: 120px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+  th { background: #f0f0f0; padding: 8px 10px; text-align: left; border: 1px solid #999; font-size: 12px; }
+  td { padding: 8px 10px; border: 1px solid #ddd; vertical-align: top; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .total-row { font-weight: bold; background: #f9f9f9; }
+  .footer { margin-top: 40px; display: flex; justify-content: space-between; }
+  .bank { line-height: 1.5; }
+  .signature { text-align: center; min-width: 200px; }
+  .signature .line { border-top: 1px solid #000; margin-top: 50px; padding-top: 4px; font-size: 11px; }
+  .toolbar { background: #2563eb; color: white; padding: 10px 20px; text-align: center; margin: -20px -20px 20px; }
+  .toolbar button { background: white; color: #2563eb; border: none; padding: 8px 18px; border-radius: 4px; cursor: pointer; font-weight: 600; margin: 0 4px; }
+  @media print { .toolbar { display: none; } body { padding: 0; } }
+</style></head><body>
+<div class="toolbar">
+  <button onclick="window.print()">Print / Save as PDF</button>
+  <button onclick="window.close()">Close</button>
+</div>
+
+<div class="header">
+  <h1>INVOICE</h1>
+  <div class="company">
+    <div class="name">WE LUCKY TCG PTE LTD</div>
+    <div>634 YISHUN STREET 61 #06-50</div>
+    <div>SINGAPORE 760634</div>
+  </div>
+</div>
+
+<div class="meta">
+  <div>
+    <div class="row"><span class="label">To :</span><span><strong>${escapeHTML(inv.customer || "")}</strong></span></div>
+  </div>
+  <div>
+    <div class="row"><span class="label">Doc No. :</span><span>IV-${escapeHTML(inv.no)}</span></div>
+    <div class="row"><span class="label">Date :</span><span>${dateFormatted}</span></div>
+    <div class="row"><span class="label">Account :</span><span>300-M0036</span></div>
+    <div class="row"><span class="label">Terms :</span><span>30 Days</span></div>
+    <div class="row"><span class="label">Currency :</span><span>SGD</span></div>
+  </div>
+</div>
+
+<table>
+  <thead><tr><th style="width:130px;">PRODUCT CODE</th><th>PRODUCT DESCRIPTION</th><th class="num" style="width:130px;">Amount (SGD)</th></tr></thead>
+  <tbody>${itemRows}</tbody>
+  <tfoot>
+    <tr class="total-row"><td colspan="2" class="num">Total :</td><td class="num">${inv.amount.toLocaleString("en-SG",{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>
+  </tfoot>
+</table>
+
+<p><strong>SINGAPORE DOLLAR : ${amountWords}</strong></p>
+
+<div class="footer">
+  <div class="bank">
+    <strong>Kindly remit to the following account:</strong><br>
+    WE LUCKY TCG PTE. LTD.<br>
+    DBS BANK 0721440946
+  </div>
+  <div class="signature">
+    <div class="line">For WE LUCKY TCG PTE. LTD.</div>
+  </div>
+</div>
+
+<scr`+`ipt>setTimeout(()=>window.print(), 400);</scr`+`ipt>
+</body></html>`;
+
+  const w = window.open("", "_blank", "width=900,height=1000");
+  w.document.write(html);
+  w.document.close();
+}
+
+async function deleteInvoice(id) {
+  const inv = store.invoices.find(x => x.id === id);
+  if (!inv) return;
+  if (!confirm("Delete this invoice? Stock from its line items (if any) will be restored.")) return;
+  if (inv.lineItems && inv.lineItems.length) {
+    for (const it of inv.lineItems) {
+      const p = store.products.find(x => x.id === it.productId);
+      if (p) { p.stock += it.qty; await cloudUpsertProduct(p); }
+    }
+  }
+  store.invoices = store.invoices.filter(x => x.id !== id);
+  save();
+  await cloudDeleteInvoice(id);
+  renderInvoices();
+}
+function renderInvoices() {
+  const tbody = document.querySelector("#invTable tbody");
+  const q = invSearch.value.toLowerCase();
+  const sf = invStatusFilter.value;
+  const rows = store.invoices
+    .filter(i => !sf || i.status === sf)
+    .filter(i => !q || (i.no+" "+i.customer+" "+i.notes).toLowerCase().includes(q))
+    .sort((a,b) => b.date.localeCompare(a.date));
+  tbody.innerHTML = rows.length ? rows.map(i => `
+    <tr>
+      <td>${i.date}</td>
+      <td><strong>${escapeHTML(i.no)}</strong></td>
+      <td>${escapeHTML(i.customer||"")}</td>
+      <td class="num">${fmt(i.amount)}</td>
+      <td><span class="pill" style="background:${i.status==='Paid'?'#dcfce7':'#fef3c7'};color:${i.status==='Paid'?'#166534':'#92400e'}">${i.status}</span></td>
+      <td>${escapeHTML(i.notes||"")}</td>
+      <td><button class="ghost" style="padding:5px 10px;font-size:12px;margin-right:4px;" onclick="generateInvoice('${i.id}')">Generate</button><button class="ghost" style="padding:5px 10px;font-size:12px;margin-right:4px;background:rgba(252,211,77,0.1);border-color:rgba(252,211,77,0.35);color:#fcd34d;" onclick="editInvoice('${i.id}')">Edit</button><button class="danger" onclick="deleteInvoice('${i.id}')">Delete</button></td>
+    </tr>`).join("") : `<tr><td colspan="7" class="empty">No invoices yet — add one above.</td></tr>`;
+  invTotal.textContent = fmt(rows.reduce((s,i)=>s+i.amount,0));
+}
+
+// ---------- Expenses ----------
+function populateCategories() {
+  expCategory.innerHTML = CATEGORIES.map(c => `<option>${c}</option>`).join("");
+  expCatFilter.innerHTML = `<option value="">All categories</option>` + CATEGORIES.map(c => `<option>${c}</option>`).join("");
+}
+async function uploadReceipt(file) {
+  if (!file) return "";
+  try {
+    const ext = file.name.split('.').pop();
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+    const { error } = await sb.storage.from('receipts').upload(path, file);
+    if (error) throw error;
+    const { data } = sb.storage.from('receipts').getPublicUrl(path);
+    return data.publicUrl;
+  } catch (err) {
+    console.error("Upload failed:", err);
+    alert("Receipt upload failed: " + err.message + "\nExpense will be saved without receipt.");
+    return "";
+  }
+}
+
+async function addExpense(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector("button[type=submit]");
+  const originalText = btn.textContent;
+
+  // EDIT MODE
+  if (editingExpenseId) {
+    const x = store.expenses.find(e => e.id === editingExpenseId);
+    if (x) {
+      const file = expFile.files[0];
+      if (file) {
+        btn.textContent = "Uploading...";
+        btn.disabled = true;
+        x.receiptUrl = await uploadReceipt(file);
+        btn.disabled = false;
+      }
+      x.date = expDate.value;
+      x.description = expDesc.value.trim();
+      x.category = expCategory.value;
+      x.vendor = expVendor.value.trim();
+      x.amount = parseFloat(expAmount.value) || 0;
+      x.ref = expRef.value.trim();
+      save();
+      await cloudUpsertExpense(x);
+    }
+    cancelExpenseEdit();
+    renderExpenses();
+    renderDashboard();
+    return;
+  }
+
+  btn.textContent = "Uploading...";
+  btn.disabled = true;
+
+  const file = expFile.files[0];
+  const receiptUrl = file ? await uploadReceipt(file) : "";
+
+  const x = {
+    id: crypto.randomUUID(),
+    date: expDate.value,
+    description: expDesc.value.trim(),
+    category: expCategory.value,
+    vendor: expVendor.value.trim(),
+    amount: parseFloat(expAmount.value) || 0,
+    ref: expRef.value.trim(),
+    receiptUrl: receiptUrl,
+  };
+  store.expenses.push(x);
+  save();
+  await cloudUpsertExpense(x);
+
+  btn.textContent = originalText;
+  btn.disabled = false;
+  e.target.reset();
+  expDate.value = todayISO();
+  renderExpenses();
+}
+async function deleteExpense(id) {
+  if (!confirm("Delete this expense?")) return;
+  store.expenses = store.expenses.filter(x => x.id !== id);
+  save();
+  await cloudDeleteExpense(id);
+  renderExpenses();
+}
+function renderExpenses() {
+  const tbody = document.querySelector("#expTable tbody");
+  const q = expSearch.value.toLowerCase();
+  const cf = expCatFilter.value;
+  const rows = store.expenses
+    .filter(x => !cf || x.category === cf)
+    .filter(x => !q || (x.description+" "+x.vendor+" "+x.ref+" "+x.category).toLowerCase().includes(q))
+    .sort((a,b) => b.date.localeCompare(a.date));
+  tbody.innerHTML = rows.length ? rows.map(x => `
+    <tr>
+      <td>${x.date}</td>
+      <td>${escapeHTML(x.description)}</td>
+      <td><span class="pill">${escapeHTML(x.category)}</span></td>
+      <td>${escapeHTML(x.vendor||"")}</td>
+      <td>${escapeHTML(x.ref||"")}</td>
+      <td class="num">${fmt(x.amount)}</td>
+      <td>${x.receiptUrl ? `<a href="${x.receiptUrl}" target="_blank" class="pill" style="text-decoration:none;background:rgba(252,211,77,0.15);color:#fcd34d;border-color:rgba(252,211,77,0.35);">View</a>` : `<span style="color:#6b7280;font-size:11px;">—</span>`}</td>
+      <td><button class="ghost" style="padding:5px 10px;font-size:12px;margin-right:4px;background:rgba(252,211,77,0.1);border-color:rgba(252,211,77,0.35);color:#fcd34d;" onclick="editExpense('${x.id}')">Edit</button><button class="danger" onclick="deleteExpense('${x.id}')">Delete</button></td>
+    </tr>`).join("") : `<tr><td colspan="8" class="empty">No expenses yet — add one above.</td></tr>`;
+  expTotal.textContent = fmt(rows.reduce((s,x)=>s+x.amount,0));
+}
+
+// ---------- Dashboard ----------
+function renderDashboard() {
+  const [from, to] = periodRange(dashPeriod.value);
+  const invs = store.invoices.filter(i => inRange(i.date, from, to));
+  const exps = store.expenses.filter(x => inRange(x.date, from, to));
+  const revenue = invs.reduce((s,i)=>s+i.amount,0);
+  const expense = exps.reduce((s,x)=>s+x.amount,0);
+  const profit = revenue - expense;
+  kpiRevenue.textContent = fmt(revenue);
+  kpiExpense.textContent = fmt(expense);
+  kpiProfit.textContent = fmt(profit);
+  kpiProfitCard.classList.toggle("positive", profit >= 0);
+  kpiProfitCard.classList.toggle("negative", profit < 0);
+  kpiMargin.textContent = revenue > 0 ? ((profit/revenue)*100).toFixed(1) + "%" : "0%";
+  kpiInvCount.textContent = invs.length;
+  kpiAvgInv.textContent = invs.length ? fmt(revenue/invs.length) : "SGD 0";
+
+  // Category breakdown
+  const byCat = {};
+  exps.forEach(x => byCat[x.category] = (byCat[x.category]||0) + x.amount);
+  const cats = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const maxCat = cats.length ? cats[0][1] : 1;
+  catBreakdown.innerHTML = cats.length ? cats.map(([c,v]) => `
+    <div class="bar-row">
+      <div>${escapeHTML(c)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(v/maxCat)*100}%"></div></div>
+      <div class="amt">${fmt(v)}</div>
+    </div>`).join("") : `<div class="empty">No expenses in this period.</div>`;
+
+  // Monthly trend
+  const months = {};
+  invs.forEach(i => {
+    const k = monthKey(i.date);
+    months[k] = months[k] || {rev:0, exp:0};
+    months[k].rev += i.amount;
+  });
+  exps.forEach(x => {
+    const k = monthKey(x.date);
+    months[k] = months[k] || {rev:0, exp:0};
+    months[k].exp += x.amount;
+  });
+  const mtbody = document.querySelector("#monthlyTable tbody");
+  const monthKeys = Object.keys(months).sort();
+  mtbody.innerHTML = monthKeys.length ? monthKeys.map(k => {
+    const m = months[k]; const p = m.rev - m.exp;
+    return `<tr><td>${k}</td><td class="num">${fmt(m.rev)}</td><td class="num">${fmt(m.exp)}</td><td class="num" style="color:${p>=0?'#059669':'#dc2626'};font-weight:600;">${fmt(p)}</td></tr>`;
+  }).join("") : `<tr><td colspan="4" class="empty">No data in this period.</td></tr>`;
+}
+
+// ---------- P&L Report ----------
+function renderPL() {
+  const from = plFrom.value, to = plTo.value;
+  const invs = store.invoices.filter(i => inRange(i.date, from, to));
+  const exps = store.expenses.filter(x => inRange(x.date, from, to));
+  const revenue = invs.reduce((s,i)=>s+i.amount,0);
+  const byCat = {};
+  exps.forEach(x => byCat[x.category] = (byCat[x.category]||0) + x.amount);
+  const total = exps.reduce((s,x)=>s+x.amount,0);
+  const profit = revenue - total;
+
+  plReport.innerHTML = `
+    <table>
+      <tbody>
+        <tr><td colspan="2" style="font-weight:700;background:#f9fafb;">REVENUE</td></tr>
+        <tr><td style="padding-left:24px;">Sales (Invoices)</td><td class="num">${fmt(revenue)}</td></tr>
+        <tr><td style="font-weight:600;">Total Revenue</td><td class="num" style="font-weight:600;border-top:1px solid #d1d5db;">${fmt(revenue)}</td></tr>
+        <tr><td colspan="2" style="font-weight:700;background:#f9fafb;padding-top:14px;">EXPENSES</td></tr>
+        ${CATEGORIES.filter(c=>byCat[c]).map(c => `<tr><td style="padding-left:24px;">${escapeHTML(c)}</td><td class="num">${fmt(byCat[c])}</td></tr>`).join("") || `<tr><td style="padding-left:24px;color:#9ca3af;">None</td><td class="num">${fmt(0)}</td></tr>`}
+        <tr><td style="font-weight:600;">Total Expenses</td><td class="num" style="font-weight:600;border-top:1px solid #d1d5db;">${fmt(total)}</td></tr>
+        <tr><td style="font-weight:700;font-size:15px;padding-top:14px;">NET PROFIT</td><td class="num" style="font-weight:700;font-size:15px;color:${profit>=0?'#059669':'#dc2626'};padding-top:14px;">${fmt(profit)}</td></tr>
+      </tbody>
+    </table>
+  `;
+}
+function setPLThisYear() {
+  const y = new Date().getFullYear();
+  plFrom.value = `${y}-01-01`; plTo.value = todayISO(); renderPL();
+}
+function setPLThisMonth() {
+  const d = new Date();
+  plFrom.value = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0,10);
+  plTo.value = todayISO(); renderPL();
+}
+
+// ---------- Import / Export ----------
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(store, null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `welucky-backup-${todayISO()}.json`;
+  a.click();
+}
+function importJSON(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.invoices || !data.expenses) throw new Error("invalid");
+      if (!confirm("This will replace your current data. Continue?")) return;
+      store = data; save();
+      renderInvoices(); renderExpenses(); renderDashboard();
+      alert("Imported successfully.");
+    } catch(err) { alert("Invalid backup file."); }
+  };
+  reader.readAsText(file);
+  ev.target.value = "";
+}
+
+// ---------- Utility ----------
+function escapeHTML(s) {
+  return String(s||"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ---------- Init ----------
+async function bootApp() {
+  populateCategories();
+  invDate.value = todayISO();
+  expDate.value = todayISO();
+  setPLThisYear();
+  // One-time migration of local data → cloud (if cloud is empty)
+  await migrateLocalToCloud();
+  // Pull all data from cloud
+  await cloudLoad();
+  // Listen for partner's changes in real time
+  subscribeRealtime();
+  fillNextInvoiceNo();
+  renderInvoices();
+  renderExpenses();
+  renderDashboard();
+  if (cloudReady) console.log("✓ Connected to Supabase. Real-time sync active.");
+}
+bootApp();
+</script>
+</body>
+</html>
